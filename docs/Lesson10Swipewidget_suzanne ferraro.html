@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <Head>
+
+        <meta charset="utf-8">
+        <meta name ="viewport" content="intitial-scale=1, maximum-scale=1, user-scalable=no"> 
+        <title> Swipe Widget and collapasable legeand/ list </title>
+        <style>
+        html, body, #viewDiv {
+            padding: 0;
+            margin: 0;
+            height:100%;
+            width:100%
+        }
+        </style>
+        <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/css/main.css">
+        <script src="https://js.arcgis.com/4.21/"></script>
+          <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/MapImageLayer",
+            "esri/widgets/Swipe",
+            "esri/widgets/Expand",
+            "esri/widgets/LayerList"
+           
+          
+        ], function(
+            Map, MapView,MapImageLayer, Swipe, Expand, LayerList
+                    ){
+
+            var myMap= new Map({
+                basemap:"dark-gray",
+            });
+
+            var myView= new MapView({
+                container:"viewDiv",
+                map: myMap, 
+                zoom:4,
+                center: [-50, 35]
+                 });
+
+                 var weeklyTempAnomaly= new MapImageLayer ({
+                     url: "https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer",
+                     sublayers:[{
+                         id:7,
+                         title: "weekly Global Sea Surface Temp Anomaly"
+                     }],
+                     title: "Surface Sea Temperature Anomaly"
+                 });
+                 myMap.add(weeklyTempAnomaly);
+
+                 myMap.add(weeklyTempAnomaly);
+
+                 var weeklyTemp = new MapImageLayer({
+                     url: "https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer",
+                     sublayers:[{
+                         id:3,
+                         title: "weekly Global Sea Surface Temperature"
+                     }],
+                     title: "Surface Sea Temperature"
+                     });
+                     myMap.add(weeklyTemp);
+
+                     const mySwipe = new Swipe({
+                         leadingLayers: [weeklyTempAnomaly],
+                         trailingLayers: [weeklyTemp],
+                         position: 20,
+                         view: myView
+                     });
+
+                     myView.ui.add(mySwipe); 
+                     //add a legend/List for the Temperature and Amomaly layer
+                     const legendListExpand = new Expand({
+                         //collapsedIconClass: "esri-icon-collection",
+                         expandIconClass:"esri-icon-collection",
+                         expandTooltip: "Legend",
+                         view: myView,
+                         content: new LayerList({
+                             view:myView,
+                             listItemCreatedFunction: function(event) {
+                                 const item =event.item;
+                                 if (item.layer.type !="group") { //don't show legend twice
+                                item.panel={
+                                    content: "legend",
+                                    open: true
+                                };
+                            }
+                             }
+                         }),
+                         expanded: false
+                     });
+                     myView.ui.add(legendListExpand, "top-left"); 
+                });
+        </script>
+<body>
+    <div id = "viewDiv"></div>
+</body>   
+</Head>
+</html>
+
